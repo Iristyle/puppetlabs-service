@@ -6,7 +6,7 @@ param(
   $Name,
 
   [Parameter(Mandatory = $true)]
-  [ValidateSet('start', 'stop', 'restart', 'status')]
+  [ValidateSet('start', 'stop', 'restart', 'enable_automatic', 'enable_manual', 'disable', 'status')]
   [String]
   $Action
 )
@@ -19,6 +19,9 @@ switch ($Action)
   'start'     { Start-Service $service }
   'stop'      { Stop-Service $service }
   'restart'   { Restart-Service $service }
+  'enable_automatic' { $service | Set-Service -StartupType 'Automatic' }
+  'enable_manual'    { $service | Set-Service -StartupType 'Manual' }
+  'disable'          { $service | Set-Service -StartupType 'Disabled' }
   'status'    {} # no-op since status always returned
 }
 
@@ -27,6 +30,7 @@ switch ($Action)
 Write-Host @"
 {
   "Name"   : "$($service.Name)",
-  "Status" : "$($service.Status)"
+  "Status" : "$($service.Status)",
+  "StartType" : "$($service.StartType)"
 }
 "@
