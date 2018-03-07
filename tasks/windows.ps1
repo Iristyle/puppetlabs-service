@@ -6,22 +6,31 @@ param(
   $Name,
 
   [Parameter(Mandatory = $true)]
-  [ValidateSet('start', 'stop', 'restart', 'enable_automatic', 'enable_manual', 'disable', 'status')]
+  [ValidateSet('start', 'stop', 'restart', 'status')]
   [String]
-  $Action
+  $Action,
+
+  [Parameter(Mandatory = $false)]
+  [ValidateSet('automatic', 'manual', 'disabled')]
+  [String]
+  $StartType
 )
 
 $ErrorActionPreference = 'Stop'
 
 $service = Get-Service -Name $Name
+
+# only set startup type when optional parameter specified
+if ($PSBoundParameters.ContainsKey('StartType'))
+{
+  $service | Set-Service -StartupType $StartType
+}
+
 switch ($Action)
 {
   'start'     { Start-Service $service }
   'stop'      { Stop-Service $service }
   'restart'   { Restart-Service $service }
-  'enable_automatic' { $service | Set-Service -StartupType 'Automatic' }
-  'enable_manual'    { $service | Set-Service -StartupType 'Manual' }
-  'disable'          { $service | Set-Service -StartupType 'Disabled' }
   'status'    {} # no-op since status always returned
 }
 
